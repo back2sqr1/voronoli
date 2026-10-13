@@ -13,38 +13,47 @@ class Console {
 public:
   Console() {
     struct winsize w;
-    ioctl(0, TIOCGWINSZ, &w);
-    printf("lines %d\n", w.ws_row);
-    printf("columns %d\n", w.ws_col);
+    ioctl(1, TIOCGWINSZ, &w);
     height = w.ws_row;
     width = w.ws_col;
-    std::string test = "";
-    for (int i = 0; i < width; i++) {
-      test += ' ';
-    }
-    buffer.resize(height, test);
+    buffer.resize(height, std::vector<std::string>(width, "\u2588"));
+    coloring.resize(height, std::vector<std::string>(width));
   }
 
   void render() {
-    for (int i = 0; i < buffer.size(); i++)
-      std::cout << buffer[i] << std::endl;
+    for (size_t i = 0; i < buffer.size(); i++) {
+      for (size_t j = 0; j < buffer[i].size(); j++) {
+        if (coloring[i][j] != "")
+          std::cout << coloring[i][j];
+        std::cout << buffer[i][j];
+        if (coloring[i][j] != "")
+          std::cout << "\033[0m";
+      }
+      if (i + 1 < buffer.size())
+        std::cout << '\n';
+    }
   }
 
-  void paint(int starting_r, int starting_c, std::string s) {
-    if (s.size() + starting_c >= width) {
-      s = s.substr(width - starting_c);
+  void paint(int starting_r, int starting_c, std::string s,
+             std::string color = "") {
+    if (s.size() + starting_c >= static_cast<size_t>(width)) {
+      s = s.substr(0, width - starting_c);
     }
-    for (int i = 0; i < s.size(); i++) {
-      buffer[starting_r][i + starting_c] = s[i];
+    for (size_t i = 0; i < s.size(); i++) {
+      coloring[starting_r][i + starting_c] = color;
+      buffer[starting_r][i + starting_c] = std::string(1, s[i]);
     }
   }
+
+  void color(int r, int c, std::string color) { coloring[r][c] = color; }
 
   int getWidth() { return width; }
   int getHeight() { return height; }
+  std::vector<std::vector<std::string>> buffer;
 
 private:
   int width, height;
-  std::vector<std::string> buffer;
+  std::vector<std::vector<std::string>> coloring;
 };
 
 #endif
