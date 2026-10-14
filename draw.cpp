@@ -8,6 +8,7 @@
 #include <vector>
 
 Point farthest_point(Point a, std::vector<Point> points);
+Point closest_point(Point a, std::vector<Point> points);
 std::vector<Point> generate_points(int n, int width, int height);
 std::unordered_map<Point, std::string>
 map_points_to_color(std::vector<Point> points);
@@ -23,7 +24,7 @@ int main() {
   for (int i = 0; i < c.getHeight(); i++) {
     for (int j = 0; j < c.getWidth(); j++) {
       Point cur(j, i);
-      Point f_point = farthest_point(cur, points);
+      Point f_point = closest_point(cur, points);
       c.color(i, j, color_map[f_point]);
     }
   }
@@ -80,6 +81,23 @@ Point farthest_point(Point a, std::vector<Point> points) {
   for (size_t i = 1; i < points.size(); i++) {
     double candidate_dist = a.dist(points[i]);
     if (candidate_dist > dist) {
+      dist = candidate_dist;
+      p = points[i];
+    }
+  }
+  return p;
+}
+
+Point closest_point(Point a, std::vector<Point> points) {
+  if (points.empty()) {
+    throw std::invalid_argument("closest_point requires at least one point");
+  }
+
+  double dist = a.dist(points[0]);
+  Point p = points[0];
+  for (size_t i = 1; i < points.size(); i++) {
+    double candidate_dist = a.dist(points[i]);
+    if (candidate_dist < dist) {
       dist = candidate_dist;
       p = points[i];
     }

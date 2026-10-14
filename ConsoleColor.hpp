@@ -14,7 +14,7 @@ public:
   Console() {
     struct winsize w;
     ioctl(1, TIOCGWINSZ, &w);
-    height = w.ws_row;
+    height = w.ws_row - 1; // -1 to account for the command line
     width = w.ws_col;
     buffer.resize(height, std::vector<std::string>(width, "\u2588"));
     coloring.resize(height, std::vector<std::string>(width));
